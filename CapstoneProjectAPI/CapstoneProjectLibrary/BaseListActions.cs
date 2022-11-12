@@ -27,7 +27,11 @@ namespace CapstoneProjectLibrary
 
             if (string.IsNullOrEmpty(listItem.Id))
             {
-                listItem.Id = (baseContext.ToDoLists.Count() + 1).ToString();
+                var temp = int.Parse((from i in baseContext.ToDoLists
+                                      orderby i.Id descending
+                                      select i).FirstOrDefault().Id);
+                temp += 1;
+                listItem.Id = temp.ToString();
             }
         }
 
@@ -41,7 +45,7 @@ namespace CapstoneProjectLibrary
             }
         }
 
-        public static async Task DeleteToDoItem(string id)
+        public static async Task DeleteListItem(string id)
         {
             using (DataBaseMain baseContext = new DataBaseMain())
             {
@@ -55,7 +59,7 @@ namespace CapstoneProjectLibrary
             }
         }
 
-        public static async Task EditToDoItem(
+        public static async Task EditListItem(
             string id,
             string title,
             string description         

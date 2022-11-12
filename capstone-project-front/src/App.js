@@ -1,24 +1,27 @@
 import logo from './logo.svg';
 import './App.css';
+import NavBar from './Components/NavBar';
+import TodoListsRenderer from './Routes/TodoListsRenderer';
+import  {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
+import TodoListsManager from './Routes/TodoListsManager';
+import TodoItemsManager from './Routes/TodoItemsManager';
+import TodaysTodos from './Routes/TodaysTodos';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className='MainPage'>
+        <NavBar/>
+        <div className="container">
+          <Routes>
+            <Route path='/' element={<TodoListsRenderer/>}/>
+            <Route path='/managelists' element={<TodoListsManager/>}/>
+            <Route path='/manageitems' element={<TodoItemsManager/>}/>
+            <Route path='/todaygoals' element={<TodaysTodos/>}/>
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 

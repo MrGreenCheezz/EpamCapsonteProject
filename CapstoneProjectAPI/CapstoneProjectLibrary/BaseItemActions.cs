@@ -27,7 +27,11 @@ namespace CapstoneProjectLibrary
 
             if (string.IsNullOrEmpty(item.Id))
             {
-                item.Id = (baseContext.ToDoItems.Count() + 1).ToString();
+               var temp = int.Parse((from i in baseContext.ToDoItems
+                           orderby i.Id descending
+                           select i).FirstOrDefault().Id);
+                temp += 1;
+                item.Id = temp.ToString();
             }
         }
 
@@ -71,8 +75,15 @@ namespace CapstoneProjectLibrary
 
                 var item = baseContext.ToDoItems.FirstOrDefault(i => i.Id == id);
 
-                item.Title = title;
-                item.Description = description;
+                if (!string.IsNullOrEmpty(title))
+                {
+                    item.Title = title; 
+                }
+
+                if (!string.IsNullOrEmpty(description))
+                {
+                    item.Description = description; 
+                }
 
                 if (dueDate != null)
                 {
@@ -89,7 +100,11 @@ namespace CapstoneProjectLibrary
                     item.Status = (ToDoStatus)status;
                 }
 
-                item.ParentListId = todolistid;
+                if (todolistid != null)
+                {
+                    item.ParentListId = todolistid; 
+                }
+
                 await baseContext.SaveChangesAsync();
             }
         }

@@ -5,11 +5,13 @@ import 'bootstrap/dist/css/bootstrap.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import TodoItemCard from './Components/TodoItemCard';
+import TodoListsRenderer from './Routes/TodoListsRenderer';
+import TodoList from './Components/TodoList';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <TodoItemCard></TodoItemCard>
+    <App></App>
   </React.StrictMode>
 );
 
