@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import Cookies from 'universal-cookie'
 
 export default class TodoItemCard extends Component {
     constructor(props) {
@@ -15,6 +16,7 @@ export default class TodoItemCard extends Component {
         this.deleteButtonClick = this
             .deleteButtonClick
             .bind(this)
+        this.addReminderCookie = this.addReminderCookie.bind(this)
         this.StatusDict = {
             "0": "NotStarted",
             "1": "InProgress",
@@ -34,7 +36,9 @@ export default class TodoItemCard extends Component {
             CreationDate: this.props.CreationDate,
             Status: this.props.Status,
             ListId: this.props.ListId,
-            IsMobile: false
+            IsMobile: false,
+            ReminderTime: "",
+            ReminderDate: ""
         }
     }
 
@@ -45,6 +49,15 @@ export default class TodoItemCard extends Component {
 
     componentWillUnmount() {
         window.removeEventListener("resize", this.resize.bind(this));
+    }
+
+    addReminderCookie(){
+        var reminderItem = {
+            Date: this.state.ReminderDate,
+            Time: this.state.ReminderTime,
+            Title: this.state.Title
+        }
+        this.props.remFunction(reminderItem)
     }
 
     deleteButtonClick() {
@@ -65,7 +78,7 @@ export default class TodoItemCard extends Component {
         } else {
             this.setState({IsMobile: false})
         }
-        console.log(currentHideNav)
+
     }
 
     EditButtonClick() {
@@ -111,7 +124,7 @@ export default class TodoItemCard extends Component {
                         }}>
                         <div className='card-body'>
                             <div className="row">
-                                <div className="col col-md-auto">
+                                <div className="col-5">
                                     <h2 className='card-title border-bottom border-2'>
                                         {this.state.Title}
                                     </h2>
@@ -162,20 +175,37 @@ export default class TodoItemCard extends Component {
                                         className={this.state.IsMobile
                                             ? "col"
                                             : "row"}>
-                                        <i className="bi bi-x-circle" onClick={this.deleteButtonClick}></i>
+                                        <i className="bi bi-x-circle" onClick={this.deleteButtonClick} title="Delete item from list"></i>
 
                                     </div>
                                     <div
                                         className={this.state.IsMobile
                                             ? "col"
                                             : "row"}>
-                                        <i className='bi bi-gear' onClick={this.EditButtonClick}></i>
+                                        <i className='bi bi-gear' onClick={this.EditButtonClick} title="Edit item"></i>
                                     </div>
                                     <div
                                         className={this.state.IsMobile
                                             ? "col"
                                             : "row"}>
-                                        <i className="bi bi-arrows-collapse"></i>
+                                        <i className="bi bi-arrows-collapse" title="Show/Hide item"></i>
+                                    </div>
+                                    <div
+                                        className={this.state.IsMobile
+                                            ? "col"
+                                            : "row"}>
+                                        <i className="bi bi-alarm" type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false" title="Add reminder"></i>
+                                        <div className='dropdown-menu' style={{width: 20}}>
+                                            <div className='container'>
+                                                <label htmlFor="timeInput">Reminder time:</label><br></br>
+                                                <input type="time" id="timeInput" onChange={(event) => this.setState({ReminderTime: event.target.value})}></input><br></br>
+                                                <label htmlFor="dateInput">Reminder date:</label><br></br>
+                                                <input type="date" id="dateInput" onChange={(event) => this.setState({ReminderDate: event.target.value})}></input><br></br>
+                                                <button className='btn btn-success' onClick={this.addReminderCookie}>Add</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -192,7 +222,7 @@ export default class TodoItemCard extends Component {
                         }}>
                         <div className='card-body'>
                             <div className="row">
-                                <div className="col col-md-auto">
+                                <div className="col-5">
                                     <h2 className='card-title border-bottom border-2'>
                                         {this.state.Title}
                                     </h2>
@@ -243,20 +273,37 @@ export default class TodoItemCard extends Component {
                                         className={this.state.IsMobile
                                             ? "col"
                                             : "row"}>
-                                        <i className="bi bi-x-circle" onClick={this.deleteButtonClick}></i>
+                                        <i className="bi bi-x-circle" onClick={this.deleteButtonClick} title="Delete item"></i>
 
                                     </div>
                                     <div
                                         className={this.state.IsMobile
                                             ? "col"
                                             : "row"}>
-                                        <i className='bi bi-gear' onClick={this.EditButtonClick}></i>
+                                        <i className='bi bi-gear' onClick={this.EditButtonClick} title="Edit item"></i>
                                     </div>
                                     <div
                                         className={this.state.IsMobile
                                             ? "col"
                                             : "row"}>
-                                        <i className="bi bi-arrows-collapse"></i>
+                                        <i className="bi bi-arrows-collapse" title="Show/Hide item"></i>
+                                    </div>
+                                    <div
+                                        className={this.state.IsMobile
+                                            ? "col"
+                                            : "row"}>
+                                        <i className="bi bi-alarm" type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false" title="Add reminder"></i>
+                                        <div className='dropdown-menu' style={{width: 20}}>
+                                            <div className='container'>
+                                                <label htmlFor="timeInput">Reminder time:</label><br></br>
+                                                <input type="time" id="timeInput" onChange={(event) => this.setState({ReminderTime: event.target.value})}></input><br></br>
+                                                <label htmlFor="dateInput">Reminder date:</label><br></br>
+                                                <input type="date" id="dateInput" onChange={(event) => this.setState({ReminderDate: event.target.value})}></input><br></br>
+                                                <button className='btn btn-success' onClick={this.addReminderCookie}>Add</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -279,13 +326,14 @@ export default class TodoItemCard extends Component {
                                             onChange={(event) => this.setState({Title: event.target.value})}></input>
                                     </h2>
                                     <div className='row'>
-                                        <div className="col-md-auto">
+                                        <div className="col-5 ">
                                             <p className='card-text'>
                                                 Finish before:
                                             </p>
                                         </div>
                                         <div className="col-md-auto">
                                             <input
+                                                style={{border: "none", borderBottom: "2px solid"}}
                                                 onChange={(event) => this.setState({DueDate: event.target.value})}
                                                 type="date"
                                                 value={this
@@ -295,13 +343,14 @@ export default class TodoItemCard extends Component {
                                         </div>
                                     </div>
                                     <div className='row'>
-                                        <div className="col-md-auto">
+                                        <div className="col-5 ">
                                             <p className='card-text'>
                                                 Created at:
                                             </p>
                                         </div>
                                         <div className="col-md-auto">
                                             <input
+                                                 style={{border: "none", borderBottom: "2px solid"}}
                                                 onChange={(event) => this.setState({CreationDate: event.target.value})}
                                                 type="date"
                                                 value={this
@@ -310,18 +359,26 @@ export default class TodoItemCard extends Component {
                                                     .split('T')[0]}></input>
                                         </div>
                                     </div>
-                                    <p className='card-text'>
-                                        Current status:
-                                        <select
-                                            className="custom-select"
-                                            id="inputGroupSelect01"
-                                            defaultValue={this.StatusDict[this.state.Status]}
-                                            onChange={(event) => this.setState({Status: event.target.value})}>
-                                            <option value="0">NotStarted</option>
-                                            <option value="1">InProgress</option>
-                                            <option value="2">Completed</option>
-                                        </select>
-                                    </p>
+                                    <div className="row">
+                                        <div className="col-5">
+                                            <p className='card-text'>
+                                                Current status:
+                                            </p>
+                                        </div>
+                                            <div className="col-md-auto">
+                                                <select
+                                                style={{border: "none", borderBottom: "2px solid"}}
+                                                    className="custom-select"
+                                                    id="inputGroupSelect01"
+                                                    defaultValue={this.state.Status}
+                                                    onChange={(event) => this.setState({Status: event.target.value})}>
+                                                    <option value="0">NotStarted</option>
+                                                    <option value="1">InProgress</option>
+                                                    <option value="2">Completed</option>
+                                                </select>
+                                            </div>
+
+                                    </div>
                                     <div className='row'>
                                         <div className="col-md-auto">
                                             <p className='card-text'>
@@ -330,6 +387,7 @@ export default class TodoItemCard extends Component {
                                         </div>
                                         <div className="col-md-auto">
                                             <input
+                                            style={{border: "none", borderBottom: "2px solid"}}
                                                 onChange={(event) => this.setState({ListId: event.target.value})}
                                                 value={this.state.ListId}></input>
                                         </div>

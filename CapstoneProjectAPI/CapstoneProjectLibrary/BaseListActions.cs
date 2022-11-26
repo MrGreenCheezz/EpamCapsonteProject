@@ -1,24 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CapstoneProjectLibrary
 {
     public static class BaseListActions
     {
-        public static async Task AddToDoListItem(ToDoBaseList listItem)
+        public static async Task<string> AddToDoListItem(ToDoBaseList listItem)
         {
             using (DataBaseMain baseContext = new DataBaseMain())
             {
-                CheckAddingItem(listItem, baseContext);
+                var id = CheckAddingItem(listItem, baseContext);
                 baseContext.ToDoLists.Add(listItem);
                 await baseContext.SaveChangesAsync();
+                return id;
             }
         }
 
-        public static void CheckAddingItem(ToDoBaseList listItem, DataBaseMain baseContext)
+        public static string CheckAddingItem(ToDoBaseList listItem, DataBaseMain baseContext)
         {
             if (listItem == null)
             {
@@ -27,12 +26,27 @@ namespace CapstoneProjectLibrary
 
             if (string.IsNullOrEmpty(listItem.Id))
             {
-                var temp = int.Parse((from i in baseContext.ToDoLists
-                                      orderby i.Id descending
-                                      select i).FirstOrDefault().Id);
-                temp += 1;
-                listItem.Id = temp.ToString();
+                var list = from i in baseContext.ToDoLists
+                           select i;
+
+                int idFirstStep;
+                var sortedList = list.OrderByDescending(i => Convert.ToInt32(i.Id));
+                try
+                {
+                    idFirstStep = Convert.ToInt32(sortedList.FirstOrDefault().Id);
+                }
+                catch
+                {
+                    idFirstStep = 0;
+                }
+                var idSecondStep = idFirstStep + 1;
+
+                listItem.Id = idSecondStep.ToString();
+
+                return listItem.Id;
             }
+
+            return "";
         }
 
         public static ToDoBaseList GetItem(string id)
@@ -59,10 +73,24 @@ namespace CapstoneProjectLibrary
             }
         }
 
+        public static async Task<string> CopyList(string id)
+        {
+            using (DataBaseMain baseContext = new DataBaseMain())
+            {
+                CheckForListItem(id, baseContext);
+                var listItem = baseContext.ToDoLists.FirstOrDefault(i => i.Id == id);
+                var newItem = listItem;
+                newItem.Id = null;
+                var newItemId = await AddToDoListItem(listItem);
+                return newItemId;
+            }
+        }
+
         public static async Task EditListItem(
             string id,
             string title,
-            string description         
+            string description,
+            bool? isHidden
         )
 
         {
@@ -71,10 +99,19 @@ namespace CapstoneProjectLibrary
                 CheckForListItem(id, baseContext);
 
                 var listItem = baseContext.ToDoLists.FirstOrDefault(i => i.Id == id);
+                if (title != null)
+                {
+                    listItem.ListTitle = title;
+                }
+                if (description != null)
+                {
+                    listItem.ListDescription = description;
+                }
+                if (isHidden != null)
+                {
+                    listItem.IsHiden = (bool)isHidden;
+                }
 
-                listItem.ListTitle = title;
-                listItem.ListDescription = description;
-             
                 await baseContext.SaveChangesAsync();
             }
         }

@@ -10,5 +10,7 @@ namespace CapstoneProjectLibrary
 
         public string ListDescription { get; set; }
 
+        public bool IsHiden { get; set; }
+
     }
 }

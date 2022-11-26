@@ -13,6 +13,12 @@ export default class TodoAddingComponent extends Component {
         this.addListButtonClicked = this
             .addListButtonClicked
             .bind(this)
+        this.callParentListUpdate = this
+            .callParentListUpdate
+            .bind(this)
+        this.callParentItemsUpdate = this
+            .callParentItemsUpdate
+            .bind(this)
         this.state = {
             Toggled: this.props.Toggled,
             Mode: this.props.Mode,
@@ -24,7 +30,9 @@ export default class TodoAddingComponent extends Component {
             ItemDueDate: "",
             ItemStatus: 0,
             ListTitle: "",
-            ListDescription: ""
+            ListDescription: "",
+            ResponseID: "",
+            isHiden: false
         }
     }
 
@@ -35,27 +43,27 @@ export default class TodoAddingComponent extends Component {
     }
 
     addItemButtonClicked() {
-        if(this.state.ItemTitle === null || this.state.ItemTitle.trim() === ""){
+        if (this.state.ItemTitle === null || this.state.ItemTitle.trim() === "") {
             this.setState({FormHaveErrors: true})
             return
         }
-        if(this.state.ItemDescription === null || this.state.ItemDescription.trim() === ""){
+        if (this.state.ItemDescription === null || this.state.ItemDescription.trim() === "") {
             this.setState({FormHaveErrors: true})
             return
         }
-        if(this.state.ItemCreationDate === null || this.state.ItemCreationDate.trim() === ""){
+        if (this.state.ItemCreationDate === null || this.state.ItemCreationDate.trim() === "") {
             this.setState({FormHaveErrors: true})
             return
         }
-        if(this.state.ItemDueDate === null || this.state.ItemDueDate.trim() === ""){
+        if (this.state.ItemDueDate === null || this.state.ItemDueDate.trim() === "") {
             this.setState({FormHaveErrors: true})
             return
         }
         this.setState({FormHaveErrors: false})
         fetch(
-            'http://localhost:21409/addItem'+ "?title=" + this.state.ItemTitle +
-                    "&description=" + this.state.ItemDescription + "&duedate=" + this.state.ItemDueDate + "&creationdate=" +
-                    this.state.ItemCreationDate + "&status=" + this.state.ItemStatus,
+            'http://localhost:21409/addItem?title=' + this.state.ItemTitle +
+                    "&description=" + this.state.ItemDescription + "&duedate=" + this.state.ItemDueDate +
+                    "&creationdate=" + this.state.ItemCreationDate + "&status=" + this.state.ItemStatus,
             {
                 method: 'POST',
                 headers: {
@@ -65,26 +73,54 @@ export default class TodoAddingComponent extends Component {
             }
         )
             .then(response => response.json())
-            this.setState({ItemTitle: "",
-            ItemDescription: "",
-            ItemCreationDate: "",
-            ItemDueDate: "",
-            ItemStatus: 0})
+            .then(data => this.callParentItemsUpdate(data))
 
+    }
+    callParentListUpdate(Id) {
+        var item = {
+            id: Id.toString(),
+            listDescription: this.state.ListDescription,
+            listTitle: this.state.ListTitle,
+            isHiden: this.state.isHiden
+        }
+        this
+            .props
+            .RefreshListFunction(item)
+        this.setState({ListTitle: "", ListDescription: ""})
+    }
+
+    callParentItemsUpdate(Id) {
+        var item = {
+            id: Id.toString(),
+
+            creationDate: this.state.ItemCreationDate,
+            description: this.state.ItemDescription,
+            dueDate: this.state.ItemDueDate,
+            parentListId: 0,
+            status: this.state.ItemStatus,
+            title: this.state.ItemTitle
+
+        }
+        this
+            .props
+            .RefreshFunction(item)
+        this.setState(
+            {ItemTitle: "", ItemDescription: "", ItemCreationDate: "", ItemDueDate: "", ItemStatus: 0}
+        )
     }
 
     addListButtonClicked() {
-        if(this.state.ListDescription === null || this.state.ListDescription.trim() === ""){
+        if (this.state.ListDescription === null || this.state.ListDescription.trim() === "") {
             this.setState({FormHaveErrors: true})
             return
         }
-        if(this.state.ListTitle === null || this.state.ListTitle.trim() === ""){
+        if (this.state.ListTitle === null || this.state.ListTitle.trim() === "") {
             this.setState({FormHaveErrors: true})
             return
         }
         this.setState({FormHaveErrors: false})
         fetch(
-            'http://localhost:21409/addList'+ "?title=" + this.state.ListTitle +
+            'http://localhost:21409/addList?title=' + this.state.ListTitle +
                     "&description=" + this.state.ListDescription,
             {
                 method: 'POST',
@@ -95,9 +131,11 @@ export default class TodoAddingComponent extends Component {
             }
         )
             .then(response => response.json())
-            this.setState({ListTitle: "",
-            ListDescription: ""})
+            .then(data => this.callParentListUpdate(data))
+
     }
+
+
 
     render() {
         if (!this.state.Toggled) {
@@ -213,7 +251,11 @@ export default class TodoAddingComponent extends Component {
                                         </div>
 
                                     </div>
-                                    {this.state.FormHaveErrors? <div className='text-danger'>No empty fields allowed!</div>: <div></div>}                    
+                                    {
+                                        this.state.FormHaveErrors
+                                            ? <div className='text-danger'>No empty fields allowed!</div>
+                                            : <div></div>
+                                    }
                                 </div>
                                 <div className="col-md-auto">
                                     <i className='bi bi-arrow-bar-down' onClick={this.expandButtonClick}></i>
@@ -275,7 +317,11 @@ export default class TodoAddingComponent extends Component {
                                             </div>
                                         </div>
                                     </div>
-                                    {this.state.FormHaveErrors? <div className='text-danger'>No empty fields allowed!</div>: <div></div>}                
+                                    {
+                                        this.state.FormHaveErrors
+                                            ? <div className='text-danger'>No empty fields allowed!</div>
+                                            : <div></div>
+                                    }
                                 </div>
                                 <div className="col-md-auto">
                                     <i className='bi bi-arrow-bar-down' onClick={this.expandButtonClick}></i>

@@ -1,22 +1,42 @@
 import React, {Component} from 'react'
+import PaginationComponent from '../Components/PaginationComponent'
 import TodoAddingComponent from '../Components/TodoAddingComponent'
 import TodoItemCard from '../Components/TodoItemCard'
 
 export default class TodoItemsManager extends Component {
     constructor(props) {
         super(props)
-
+        this.PaginationChanged = this.PaginationChanged.bind(this)
+        this.addItem = this.addItem.bind(this)
         this.state = {
-            Items: []
+            Items: [],
+            PagesCount: 0
         }
     }
     async componentDidMount() {
-        const items = await this.GetListsFromApi()
+        const items = await this.GetListsFromApi(6,0)
+        this.setState({Items: items})
+        const itemscount = await fetch("http://localhost:21409/getItemsCount")
+        const countjson = await itemscount.json()
+        this.setState({PagesCount: countjson})
+    }
+
+   async PaginationChanged(index){
+        const items = await this.GetListsFromApi(6,index)
         this.setState({Items: items})
     }
 
-    async GetListsFromApi() {
-        const response = await fetch("http://localhost:21409/getItems?amount=6")
+    addItem(Item) {
+        var tempArray = this
+            .state
+            .Items
+            tempArray
+            .unshift(Item)
+        this.setState({Items: tempArray})
+    }
+
+    async GetListsFromApi(amount, offset) {
+        const response = await fetch("http://localhost:21409/getItems?amount="+amount+"&offset="+offset)
         const jsonResponse = await response.json();
         return jsonResponse;
     }
@@ -24,7 +44,7 @@ export default class TodoItemsManager extends Component {
         return (
             <div>
 
-                <TodoAddingComponent Toggled={false} Mode="ItemForm"/>
+                <TodoAddingComponent Toggled={false} Mode="ItemForm" RefreshFunction={this.addItem}/>
 
                 <div className='row'>
                     <div
@@ -46,6 +66,7 @@ export default class TodoItemsManager extends Component {
                                             Status={item.status}
                                             key={item.id}
                                             Id={item.id}
+                                            remFunction={this.props.remFunction}
                                             ListId={item.parentListId}
                                             Mode="InManagerView"></TodoItemCard>
                                     )
@@ -53,6 +74,7 @@ export default class TodoItemsManager extends Component {
                         </div>
                     </div>
                 </div>
+                {this.state.PagesCount > 0 ? <PaginationComponent PagesCount={this.state.PagesCount / 6} ParentPageChanged={this.PaginationChanged}></PaginationComponent>: <div></div> }
             </div>
         )
     }

@@ -56,9 +56,20 @@ namespace CapstoneProjectAPI.Controllers
             item.CreationDate = creationdate;
             item.Status = status;
 
-            await BaseItemActions.AddToDoItem(item);
+            var id = await BaseItemActions.AddToDoItem(item);
 
-            return Ok();
+            return Ok(id);
+        }
+
+        [Route("getItemsCount")]
+        [HttpGet]
+        public int GetCount()
+        {
+            using (DataBaseMain baseContext = new DataBaseMain())
+            {
+              var count =  baseContext.ToDoItems.Count();
+               return count;
+            }
         }
 
         [Route("deleteItem")]
